@@ -44,6 +44,7 @@ const createCard = ('/cards', (req, res) => {
 });
 
 const likeCard = ('/cards', (req, res) => {
+  console.log(req.params.cardId);
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -52,13 +53,12 @@ const likeCard = ('/cards', (req, res) => {
     .orFail(() => new Error('Not found'))
     .then((user) => res.status(201).send(user))
     .catch((err) => {
-      if (err.message.includes('Validation failed')) {
-        return res.status(404).send({ message: 'Вы ввели некоректные данные' });
+      if (req.params.cardId.length === 24) {
+        return res.status(404).send({ message: 'Вы ввели некоректный ID' });
       }
-      if (err.message.includes('ObjectId failed')) {
-        return res.status(400).send({ message: 'Запрашиваемый пользователь не найден' });
+      if (req.params.cardId.length !== '24') {
+        return res.status(400).send({ message: 'Вы ввели некоректные данные' });
       }
-
       return res.status(500).send({
         message: 'Internal Server Error',
         err: err.message,
