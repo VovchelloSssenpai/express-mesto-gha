@@ -49,13 +49,14 @@ const likeCard = ('/cards', (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
+    .orFail(() => new Error('Not found'))
     .then((user) => res.status(201).send(user))
     .catch((err) => {
       if (err.message.includes('Validation failed')) {
-        return res.status(400).send({ message: 'Вы ввели некоректные данные' });
+        return res.status(404).send({ message: 'Вы ввели некоректные данные' });
       }
       if (err.message.includes('ObjectId failed')) {
-        return res.status(404).send({ message: 'Запрашиваемый пользователь не найден' });
+        return res.status(400).send({ message: 'Запрашиваемый пользователь не найден' });
       }
 
       return res.status(500).send({

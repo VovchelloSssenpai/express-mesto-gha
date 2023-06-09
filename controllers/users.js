@@ -10,7 +10,7 @@ const getUserById = ('/users/:id',
         return res.status(404).send({ message: 'Вы ввели некоректные данные' });
       }
       if (err.message.includes('ObjectId failed')) {
-        return res.status(400).send({ message: 'Запрашиваемый пользователь не найден' });
+        return res.status(404).send({ message: 'Запрашиваемый пользователь не найден' });
       }
       return res.status(500).send({
         message: 'Internal Server Error',
@@ -54,7 +54,7 @@ const updateUser = ('/users',
 (req, res) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .then((user) => res.status(201).send(user))
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.message.includes('Validation failed')) {
         return res.status(400).send({ message: 'Вы ввели некоректные данные' });
@@ -74,7 +74,7 @@ const updateAvatar = ('/users',
 (req, res) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-    .then((user) => res.status(201).send(user))
+    .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.message.includes('Validation failed')) {
         return res.status(400).send({ message: 'Вы ввели некоректные данные' });
