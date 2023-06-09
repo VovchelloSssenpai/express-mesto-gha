@@ -6,15 +6,17 @@ const getUserById = ('/users/:id',
     .orFail(() => new Error('Not found'))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.message.includes('ObjectId failed')) {
-        res.status(404).send({ message: 'Запрашиваемый пользователь не найден' });
-      } else {
-        res.status(500).send({
-          message: 'Internal Server Error',
-          err: err.message,
-          stack: err.stack,
-        });
+      if (err.message.includes('Validation failed')) {
+        return res.status(400).send({ message: 'Вы ввели некоректные данные' });
       }
+      if (err.message.includes('ObjectId failed')) {
+        return res.status(404).send({ message: 'Запрашиваемый пользователь не найден' });
+      }
+      return res.status(500).send({
+        message: 'Internal Server Error',
+        err: err.message,
+        stack: err.stack,
+      });
     });
 });
 
