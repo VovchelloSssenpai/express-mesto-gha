@@ -15,15 +15,17 @@ const deleteCardById = ('/cards/:id', (req, res) => {
   Card.findByIdAndRemove(req.params.id)
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.message === 'Not found') {
-        res.status(404).send({ message: 'Запрашиваемая карточка не найдена' });
-      } else {
-        res.status(500).send({
-          message: 'Internal Server Error',
-          err: err.message,
-          stack: err.stack,
-        });
+      if (req.params.cardId.length === 24) {
+        return res.status(404).send({ message: 'Вы ввели некоректный ID' });
       }
+      if (req.params.cardId.length !== '24') {
+        return res.status(400).send({ message: 'Вы ввели некоректные данные' });
+      }
+      return res.status(500).send({
+        message: 'Internal Server Error',
+        err: err.message,
+        stack: err.stack,
+      });
     });
 });
 
@@ -72,15 +74,14 @@ const dislikeCard = ('/cards', (req, res) => Card.findByIdAndUpdate(
   req.params.cardId,
   { $pull: { likes: req.user._id } },
   { new: true },
-).then((user) => res.status(201).send(user))
+).then((user) => res.status(200).send(user))
   .catch((err) => {
-    if (err.message.includes('Validation failed')) {
+    if (req.params.cardId.length === 24) {
+      return res.status(404).send({ message: 'Вы ввели некоректный ID' });
+    }
+    if (req.params.cardId.length !== '24') {
       return res.status(400).send({ message: 'Вы ввели некоректные данные' });
     }
-    if (err.message.includes('ObjectId failed')) {
-      return res.status(404).send({ message: 'Запрашиваемый пользователь не найден' });
-    }
-
     return res.status(500).send({
       message: 'Internal Server Error',
       err: err.message,
