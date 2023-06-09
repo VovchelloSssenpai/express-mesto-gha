@@ -7,10 +7,10 @@ const getUserById = ('/users/:id',
     .then((user) => { res.status(200).send(user); })
     .catch((err) => {
       if (req.params.id.length === 24) {
-        return res.status(400).send({ message: 'Вы ввели некоректный ID' });
+        return res.status(404).send({ message: 'Вы ввели некоректный ID' });
       }
       if (req.params.id.length !== '24') {
-        return res.status(404).send({ message: 'Вы ввели некоректные данные' });
+        return res.status(400).send({ message: 'Вы ввели некоректные данные' });
       }
       return res.status(500).send({
         message: 'Internal Server Error',
