@@ -55,10 +55,9 @@ const likeCard = ('/cards', (req, res) => {
     .orFail(() => new Error('Not found'))
     .then((user) => res.status(201).send(user))
     .catch((err) => {
-      if (req.params.cardId.length === 24) {
-        return res.status(404).send({ message: 'Вы ввели некоректный ID' });
-      }
-      if (req.params.cardId.length !== '24') {
+      if (err.stack.includes('Not found')) {
+        return res.status(404).send({ message: 'Вы ввели некоректный ID' }); }
+      if (err.name.includes('CastError')) {
         return res.status(400).send({ message: 'Вы ввели некоректные данные' });
       }
       return res.status(500).send({
@@ -71,15 +70,12 @@ const likeCard = ('/cards', (req, res) => {
 );
 
 const dislikeCard = ('/cards', (req, res) => Card.findByIdAndUpdate(
-
+  req.params.cardId,
   { $pull: { likes: req.user._id } },
   { new: true },
-).then((user) => { res.status(200).send(user); })
+).then((user) => { if (user === null) { return res.status(404).send({ message: 'Вы ввели некоректный ID' }); } return res.status(200).send(user); })
   .catch((err) => {
-    if (req.params.cardId.length === 24) {
-      return res.status(404).send({ message: 'Вы ввели некоректный ID' });
-    }
-    if (req.params.cardId.length !== 24) {
+    if (err.name.includes('CastError')) {
       return res.status(400).send({ message: 'Вы ввели некоректные данные' });
     }
     return res.status(500).send({
