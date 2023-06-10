@@ -20,6 +20,10 @@ app.use((req, res, next) => {
 });
 app.use(router);
 
+app.all('*', (req, res) => {
+  res.status(404).send({ message: 'Ресурс не найден, проверьте путь и метод запроса' });
+});
+
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`App listening on port ${PORT}`);
