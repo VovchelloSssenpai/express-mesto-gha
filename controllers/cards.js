@@ -14,12 +14,12 @@ const getCards = ('/cards', (req, res) => {
 const deleteCardById = ('/cards/:id', (req, res) => {
   Card.findByIdAndRemove(req.params.id)
     .orFail(() => new Error('Not found'))
-    .then((user) => res.status(200).send(user))
+    .then((user) => { res.status(200).send(user); })
     .catch((err) => {
-      if (req.params.cardId.length === 24) {
+      if (err.message === 'Not found') {
         return res.status(404).send({ message: 'Вы ввели некоректный ID' });
       }
-      if (req.params.cardId.length !== '24') {
+      if (err.name.includes('CastError')) {
         return res.status(400).send({ message: 'Вы ввели некоректные данные' });
       }
       return res.status(500).send({
@@ -56,7 +56,8 @@ const likeCard = ('/cards', (req, res) => {
     .then((user) => res.status(201).send(user))
     .catch((err) => {
       if (err.stack.includes('Not found')) {
-        return res.status(404).send({ message: 'Вы ввели некоректный ID' }); }
+        return res.status(404).send({ message: 'Вы ввели некоректный ID' });
+      }
       if (err.name.includes('CastError')) {
         return res.status(400).send({ message: 'Вы ввели некоректные данные' });
       }
