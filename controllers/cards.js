@@ -17,7 +17,7 @@ const getCards = ((req, res) => {
 const deleteCardById = ((req, res) => {
   Card.findByIdAndRemove(req.params.id)
     .orFail(() => new Error('Not found'))
-    .then((user) => { if (!user) { return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Запрашиваемый пользователь не найден' }); } return res.send(user); })
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.message === 'Not found') {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Вы ввели некоректный ID' });
@@ -58,8 +58,12 @@ const likeCard = ((req, res) => {
     { new: true },
   )
     .orFail(() => new Error('Not found'))
-    .then((user) => { if (!user) { return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Запрашиваемый пользователь не найден' }); } return res.status(201).send(user); })
+    .then((user) => { res.status(201).send(user); })
     .catch((err) => {
+      console.log(err.message);
+      if (err.message === 'Not found') {
+        return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Запрашиваемый пользователь не найден' });
+      }
       if (err.name.includes('CastError')) {
         return res.status(INCORRECT_ERROR_CODE).send({ message: 'Вы ввели некоректные данные' });
       }
@@ -74,8 +78,14 @@ const dislikeCard = ((req, res) => Card.findByIdAndUpdate(
   req.params.cardId,
   { $pull: { likes: req.user._id } },
   { new: true },
-).then((user) => { if (user === null) { return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Вы ввели некоректный ID' }); } return res.status(200).send(user); })
+)
+  .orFail(() => new Error('Not found'))
+  .then((user) => res.send(user))
   .catch((err) => {
+    if (err.message === 'Not found') {
+      return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Вы ввели некоректный ID' });
+    }
+
     if (err.name.includes('CastError')) {
       return res.status(INCORRECT_ERROR_CODE).send({ message: 'Вы ввели некоректные данные' });
     }
