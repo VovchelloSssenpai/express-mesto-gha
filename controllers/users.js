@@ -40,7 +40,6 @@ const createUser = (
       name: req.body.name,
       about: req.body.about,
       avatar: req.body.avatar,
-      owner: req.user._id,
     };
 
     User.create(userData)

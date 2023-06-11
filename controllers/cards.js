@@ -90,8 +90,6 @@ const dislikeCard = ((req, res) => Card.findByIdAndUpdate(
     }
     return res.status(DEFAULT_ERROR_CODE).send({
       message: 'Internal Server Error',
-      err: err.message,
-      stack: err.stack,
     });
   }));
 
