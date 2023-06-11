@@ -60,7 +60,6 @@ const likeCard = ((req, res) => {
     .orFail(() => new Error('Not found'))
     .then((user) => { res.status(201).send(user); })
     .catch((err) => {
-      console.log(err.message);
       if (err.message === 'Not found') {
         return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Запрашиваемый пользователь не найден' });
       }
