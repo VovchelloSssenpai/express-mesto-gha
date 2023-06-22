@@ -6,7 +6,6 @@ const ConflictError = require('../utils/ConflictError');
 // eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
   let error;
-
   if (err.message.includes('Validation failed')) {
     error = new IncorrectError();
   } else if (err.message === 'Not found') {
