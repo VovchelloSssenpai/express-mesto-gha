@@ -1,3 +1,10 @@
+const bcrypt = require('bcryptjs');
+const jsonWebToken = require('jsonwebtoken');
+const DefaultError = require('../utils/DefaultError');
+const IncorrectError = require('../utils/IncorrectError');
+const NotFoundError = require('../utils/NotFoundError');
+const ConflictError = require('../utils/ConflictError');
+
 const User = require('../models/user');
 const {
   INCORRECT_ERROR_CODE,
@@ -6,88 +13,97 @@ const {
 } = require('../utils/utils');
 
 const getUserById = (
-  (req, res) => {
+  (req, res, next) => {
     User.findById(req.params.id)
       .orFail(() => new Error('Not found'))
       .then((user) => { res.send(user); })
-      .catch((err) => {
-        if (err.message === 'Not found') {
-          return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Вы ввели некоректный ID' });
-        }
-        if (err.name === 'CastError') {
-          return res.status(INCORRECT_ERROR_CODE).send({ message: 'Вы ввели некоректные данные' });
-        }
-        return res.status(DEFAULT_ERROR_CODE).send({
-          message: 'Internal Server Error',
-        });
-      });
+      .catch(next);
   });
 
 const getUsers = (
-  (req, res) => {
+  (req, res, next) => {
     User.find({})
       .then((usersData) => res.send(usersData))
-      .catch(() => {
-        res.status(DEFAULT_ERROR_CODE).send({
-          message: 'Internal Server Error',
-        });
-      });
+      .catch(next);
+  });
+
+const getUser = (
+  (req, res, next) => {
+    User.findById(req.user._id)
+      .orFail(() => new Error('Not found'))
+      .then((user) => { res.send(user); })
+      .catch(next);
   });
 
 const createUser = (
-  (req, res) => {
+  (req, res, next) => {
     const userData = {
       name: req.body.name,
       about: req.body.about,
       avatar: req.body.avatar,
+      email: req.body.email,
+      password: req.body.password,
     };
 
-    User.create(userData)
-      .then((user) => res.status(201).send(user))
-      .catch((err) => {
-        if (err.message.includes('validation failed')) {
-          return res.status(INCORRECT_ERROR_CODE).send({ message: 'Вы ввели некоректные данные' });
-        }
-        return res.status(DEFAULT_ERROR_CODE).send({
-          message: 'Internal Server Error',
-        });
+    bcrypt.hash(String(req.body.password), 10)
+      .then((hashedPassword) => {
+        User.create({ ...userData, password: hashedPassword })
+          .then((user) => res.status(201).send(user))
+          .catch(next);
       });
   });
 
 const updateUser = (
-  (req, res) => {
+  (req, res, next) => {
     const { name, about } = req.body;
     User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
       .then((user) => { if (!user) { return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Запрашиваемый пользователь не найден' }); } return res.send(user); })
-      .catch((err) => {
-        if (err.message.includes('Validation failed')) {
-          return res.status(INCORRECT_ERROR_CODE).send({ message: 'Вы ввели некоректные данные' });
-        }
-        return res.status(DEFAULT_ERROR_CODE).send({
-          message: 'Internal Server Error',
-        });
-      });
+      .catch(next);
   });
 
 const updateAvatar = (
-  (req, res) => {
+  (req, res, next) => {
     const { avatar } = req.body;
     User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
       .then((user) => { if (!user) { return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Запрашиваемый пользователь не найден' }); } return res.send(user); })
-      .catch((err) => {
-        if (err.message.includes('Validation failed')) {
-          return res.status(INCORRECT_ERROR_CODE).send({ message: 'Вы ввели некоректные данные' });
-        }
-        return res.status(DEFAULT_ERROR_CODE).send({
-          message: 'Internal Server Error',
-        });
-      });
+      .catch(next);
   });
+
+const login = (
+  (req, res, next) => {
+    const { email, password } = req.body;
+    User.findOne({ email })
+      .select('+password')
+      .orFail(() => new Error('Not found'))
+      .then((user) => {
+        bcrypt.compare(String(password), user.password).then((isValidUser) => {
+          if (isValidUser) {
+            const jwt = jsonWebToken.sign({
+              _id: user._id,
+            }, 'SECRET');
+
+            res.cookie('jwt', jwt, {
+              maxAge: 360000,
+              httpOnly: true,
+              sameSite: true,
+            });
+
+            res.send({ data: user.toJSON() });
+          } else {
+            throw new NotFoundError();
+          }
+        });
+      })
+      .catch(next);
+  }
+);
 
 module.exports = {
   getUserById,
   getUsers,
+  getUser,
   createUser,
   updateUser,
   updateAvatar,
+  login,
 };
