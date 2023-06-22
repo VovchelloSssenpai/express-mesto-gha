@@ -3,6 +3,7 @@ const jsonWebToken = require('jsonwebtoken');
 const DefaultError = require('../utils/DefaultError');
 const IncorrectError = require('../utils/IncorrectError');
 const NotFoundError = require('../utils/NotFoundError');
+const WrongDataError = require('../utils/WrongDataError');
 const ConflictError = require('../utils/ConflictError');
 
 const User = require('../models/user');
@@ -90,7 +91,7 @@ const login = (
 
             res.send({ data: user.toJSON() });
           } else {
-            throw new NotFoundError();
+            throw new WrongDataError();
           }
         });
       })

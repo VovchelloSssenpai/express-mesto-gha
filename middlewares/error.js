@@ -2,6 +2,7 @@ const DefaultError = require('../utils/DefaultError');
 const IncorrectError = require('../utils/IncorrectError');
 const NotFoundError = require('../utils/NotFoundError');
 const ConflictError = require('../utils/ConflictError');
+const WrongDataError = require('../utils/WrongDataError');
 
 // eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
@@ -14,6 +15,8 @@ const errorHandler = (err, req, res, next) => {
     error = new IncorrectError();
   } else if (err.code === 11000) {
     error = new ConflictError();
+  } else if (err.name === 'WrongDataError') {
+    error = new WrongDataError();
   } else {
     error = new DefaultError();
   }
