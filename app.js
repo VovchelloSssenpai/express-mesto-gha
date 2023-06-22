@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const router = require('./routes');
 const errorHandler = require('./middlewares/error');
+const { errors } = require('celebrate');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -18,6 +19,8 @@ app.use(router);
 app.all('*', (req, res) => {
   res.status(404).send({ message: 'Ресурс не найден, проверьте путь и метод запроса' });
 });
+
+app.use(errors());
 app.use(errorHandler);
 
 app.listen(PORT);
