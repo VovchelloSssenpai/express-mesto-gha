@@ -7,11 +7,10 @@ const LimitedAccessError = require('../utils/LimitedAccessError');
 
 // eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
-  console.log(err);
   let error;
   if (err.message.includes('Validation failed')) {
     error = new IncorrectError();
-  } else if (err.message === 'Not found') {
+  } else if (err.message === 'Not found' || err.message === 'Пользователь не найден') {
     error = new NotFoundError();
   } else if (err.name === 'CastError') {
     error = new IncorrectError();

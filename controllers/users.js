@@ -1,11 +1,11 @@
 const bcrypt = require('bcryptjs');
 const jsonWebToken = require('jsonwebtoken');
 const WrongDataError = require('../utils/WrongDataError');
-
 const User = require('../models/user');
 const {
   NOT_FOUND_ERROR_CODE,
 } = require('../utils/utils');
+const NotFoundError = require('../utils/NotFoundError');
 
 const getUserById = (
   (req, res, next) => {
@@ -32,7 +32,6 @@ const getUser = (
 
 const createUser = (
   (req, res, next) => {
-    console.log(req.body);
     const userData = {
       name: req.body.name,
       about: req.body.about,
@@ -53,7 +52,7 @@ const updateUser = (
   (req, res, next) => {
     const { name, about } = req.body;
     User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-      .then((user) => { if (!user) { return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Запрашиваемый пользователь не найден' }); } return res.send(user); })
+      .then((user) => { if (!user) { throw new NotFoundError(); } return res.send(user); })
       .catch(next);
   });
 
@@ -61,7 +60,7 @@ const updateAvatar = (
   (req, res, next) => {
     const { avatar } = req.body;
     User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
-      .then((user) => { if (!user) { return res.status(NOT_FOUND_ERROR_CODE).send({ message: 'Запрашиваемый пользователь не найден' }); } return res.send(user); })
+      .then((user) => { if (!user) { throw new NotFoundError(); } return res.send(user); })
       .catch(next);
   });
 
