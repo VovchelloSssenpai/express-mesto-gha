@@ -32,6 +32,7 @@ const getUser = (
 
 const createUser = (
   (req, res, next) => {
+    console.log(req.body);
     const userData = {
       name: req.body.name,
       about: req.body.about,

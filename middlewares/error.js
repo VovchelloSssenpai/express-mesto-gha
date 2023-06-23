@@ -6,7 +6,6 @@ const WrongDataError = require('../utils/WrongDataError');
 
 // eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
-
   console.log(err);
   let error;
   if (err.message.includes('Validation failed')) {
