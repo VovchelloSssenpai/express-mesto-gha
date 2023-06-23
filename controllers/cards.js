@@ -1,7 +1,4 @@
 const Card = require('../models/card');
-const DefaultError = require('../utils/DefaultError');
-const IncorrectError = require('../utils/IncorrectError');
-const NotFoundError = require('../utils/NotFoundError');
 const LimitedAccessError = require('../utils/LimitedAccessError');
 
 const getCards = ((req, res, next) => {
@@ -14,7 +11,7 @@ const deleteCardById = ((req, res, next) => {
     .orFail(() => new Error('Not found'))
     .then((user) => {
       if (req.user._id !== user.owner.toString()) {
-        next(new LimitedAccessError());
+        throw new LimitedAccessError();
       }
       return Card.findByIdAndRemove(req.params.id).then((data) => res.send(data));
     })

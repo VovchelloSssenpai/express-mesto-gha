@@ -1,16 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jsonWebToken = require('jsonwebtoken');
-const DefaultError = require('../utils/DefaultError');
-const IncorrectError = require('../utils/IncorrectError');
-const NotFoundError = require('../utils/NotFoundError');
 const WrongDataError = require('../utils/WrongDataError');
-const ConflictError = require('../utils/ConflictError');
 
 const User = require('../models/user');
 const {
-  INCORRECT_ERROR_CODE,
   NOT_FOUND_ERROR_CODE,
-  DEFAULT_ERROR_CODE,
 } = require('../utils/utils');
 
 const getUserById = (
@@ -75,7 +69,7 @@ const login = (
     const { email, password } = req.body;
     User.findOne({ email })
       .select('+password')
-      .orFail(() => new Error('Not found'))
+      .orFail(() => new WrongDataError())
       .then((user) => {
         bcrypt.compare(String(password), user.password).then((isValidUser) => {
           if (isValidUser) {
