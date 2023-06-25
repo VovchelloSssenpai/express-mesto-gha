@@ -2,9 +2,6 @@ const bcrypt = require('bcryptjs');
 const jsonWebToken = require('jsonwebtoken');
 const WrongDataError = require('../utils/WrongDataError');
 const User = require('../models/user');
-const {
-  NOT_FOUND_ERROR_CODE,
-} = require('../utils/utils');
 const NotFoundError = require('../utils/NotFoundError');
 
 const getUserById = (
@@ -85,7 +82,7 @@ const login = (
 
             res.send({ data: user.toJSON() });
           } else {
-            throw new WrongDataError();
+            next(new WrongDataError());
           }
         });
       })

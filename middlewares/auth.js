@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const WrongDataError = require('../utils/WrongDataError');
 
 const auth = (req, res, next) => {
   const token = req.cookies.jwt;
@@ -7,10 +8,7 @@ const auth = (req, res, next) => {
   try {
     payload = jwt.verify(token, 'SECRET');
   } catch (err) {
-    // next(err);
-    return res
-      .status(401)
-      .send({ message: 'Необходима авторизация' });
+    next(new WrongDataError());
   }
 
   req.user = payload;
